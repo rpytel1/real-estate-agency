@@ -3,4 +3,7 @@
   <data-source name="Oracle - @localhost" uuid="aa2975aa-394d-4358-b4fa-bb6ee08d816c">
     <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
   </data-source>
+  <data-source name="Oracle - @localhost [2]" uuid="11d7b448-9809-4423-b06d-b864833b9d85">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
 </component>

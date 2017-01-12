@@ -1,7 +1,6 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,8 +19,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import sample.scenes.TotalNewEstateScene;
 
 public class Main extends Application {
     private TableView<Person> table = new TableView<Person>();
@@ -53,9 +52,19 @@ public class Main extends Application {
         vboxOptions.setSpacing(5);
         vboxOptions.setPadding(new Insets(10, 0, 0, 10));
         ;
-        Label label1 = new Label("Add new Query");
+        Label label1 = new Label("Possible actions");
         Button button = new Button("Find best estates for clients");
         Button addTotallyNewEstate = new Button("Add totally new Estate");
+        addTotallyNewEstate.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Stage addStage=new Stage();
+                TotalNewEstateScene tnE=new TotalNewEstateScene(new Group());
+                tnE.init();
+                addStage.setScene(tnE);
+                addStage.show();
+            }
+        });
         Button findNewDevOffers = new Button("Find new offers from Developer");
         vboxOptions.getChildren().addAll(label1, button, addTotallyNewEstate, findNewDevOffers);
         final HBox hboxMain = new HBox();

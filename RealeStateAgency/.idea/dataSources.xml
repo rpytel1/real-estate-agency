@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="1618182077">
+  <component name="DataSourceManagerImpl" format="xml" hash="4174185792">
     <data-source source="LOCAL" name="Oracle - @localhost" uuid="aa2975aa-394d-4358-b4fa-bb6ee08d816c">
+      <driver-ref>oracle</driver-ref>
+      <auto-commit>false</auto-commit>
+      <jdbc-driver>oracle.jdbc.OracleDriver</jdbc-driver>
+      <jdbc-url>jdbc:oracle:thin:@//localhost:1521/rpytel</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="Oracle - @localhost [2]" uuid="11d7b448-9809-4423-b06d-b864833b9d85">
       <driver-ref>oracle</driver-ref>
       <auto-commit>false</auto-commit>
       <jdbc-driver>oracle.jdbc.OracleDriver</jdbc-driver>
