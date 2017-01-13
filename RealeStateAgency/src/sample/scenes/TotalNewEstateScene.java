@@ -9,8 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import sample.components.NewEstateLabel;
+import sample.components.CustomLongLabel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,25 +31,25 @@ public class TotalNewEstateScene extends Scene {
 
     public void init() {
         VBox mainVBox = new VBox();
-        NewEstateLabel title = new NewEstateLabel("Specify your new estate");
-        NewEstateLabel districtTitle = new NewEstateLabel("District");
+        CustomLongLabel title = new CustomLongLabel("Specify your new estate");
+        CustomLongLabel districtTitle = new CustomLongLabel("District");
         mainVBox.getChildren().addAll(title, districtTitle);
 
         for (String label : districtLabels) {
             HBox hbox = new HBox();
-            NewEstateLabel lab = new NewEstateLabel(label);
+            CustomLongLabel lab = new CustomLongLabel(label);
             TextField textField = new TextField();
 
             hbox.getChildren().addAll(lab, textField);
             mainVBox.getChildren().add(hbox);
         }
-        NewEstateLabel estateTitle = new NewEstateLabel("Estate");
-        NewEstateLabel estateName = new NewEstateLabel(estateLabels[0]);
+        CustomLongLabel estateTitle = new CustomLongLabel("Estate");
+        CustomLongLabel estateName = new CustomLongLabel(estateLabels[0]);
         mainVBox.getChildren().addAll(estateTitle, estateName);
 
         for (int i = 1; i < estateLabels.length; i++) {
             HBox hbox = new HBox();
-            NewEstateLabel lab=new NewEstateLabel(estateLabels[i]);
+            CustomLongLabel lab=new CustomLongLabel(estateLabels[i]);
             final ToggleGroup toggleGroup=new ToggleGroup();
             RadioButton yes=new RadioButton("Yes");
             yes.setToggleGroup(toggleGroup);
@@ -65,12 +64,12 @@ public class TotalNewEstateScene extends Scene {
             hbox.getChildren().addAll(lab,yes,no);
             mainVBox.getChildren().add(hbox);
         }
-        NewEstateLabel propertyTitle = new NewEstateLabel("Property");
+        CustomLongLabel propertyTitle = new CustomLongLabel("Property");
 
         for(int i=0;i<propertyLabels.length;i++){
             HBox hbox=new HBox();
 
-                NewEstateLabel lab = new NewEstateLabel(propertyLabels[i]);
+                CustomLongLabel lab = new CustomLongLabel(propertyLabels[i]);
             if(i<(propertyLabels.length-1)){
                 TextField textField = new TextField();
                 hbox.getChildren().addAll(lab, textField);
