@@ -4,10 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Group;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -79,10 +76,12 @@ public class EstateChooseScene extends HomeScene {
                                     {
                                         EstateToChoose estateToChoose = getTableView().getItems().get(getIndex());
                                         System.out.println(estateToChoose.getId());
-                                        HomeScene homeScene = new HomeScene(new Group(), stage);
-                                        homeScene.init();
-                                        stage.setScene(homeScene);
-                                        stage.show();
+                                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                        alert.setTitle("Adding new offer");
+                                        alert.setHeaderText("Added Estate to our offer");
+                                        alert.showAndWait();
+                                        //TODO: powinno też znikać 
+
                                     });
                                     setGraphic(btn);
                                     setText(null);
