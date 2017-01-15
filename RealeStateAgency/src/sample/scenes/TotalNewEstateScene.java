@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class TotalNewEstateScene extends Scene {
     String[] districtLabels = {"City", "District name", "how long travel from city center", "how far from city center"};
-    String[] estateLabels = {"Estate name", "Playground", "Parking"};
+    String[] estateLabels = {"EstateToChoose name", "Playground", "Parking"};
     String[] buildingLabels={"Level number","Post Code","Adress"};
     String[] propertyLabels={"Room number","Square meters","Level","Terrace"};
     Map<String,String> answers=new HashMap<>();
@@ -43,7 +43,7 @@ public class TotalNewEstateScene extends Scene {
             hbox.getChildren().addAll(lab, textField);
             mainVBox.getChildren().add(hbox);
         }
-        CustomLongLabel estateTitle = new CustomLongLabel("Estate");
+        CustomLongLabel estateTitle = new CustomLongLabel("EstateToChoose");
         CustomLongLabel estateName = new CustomLongLabel(estateLabels[0]);
         mainVBox.getChildren().addAll(estateTitle, estateName);
 

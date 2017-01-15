@@ -61,7 +61,7 @@ public class HomeScene extends Scene {
         VBox actionVbox = new VBox();
         Label label1 = new Label("Possible actions");
         Button button = new Button("Find best estates for clients");
-        Button addTotallyNewEstate = new Button("Add totally new Estate");
+        Button addTotallyNewEstate = new Button("Add totally new EstateToChoose");
         addTotallyNewEstate.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -137,9 +137,9 @@ public class HomeScene extends Scene {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("EstateScene!");
-                EstateChooseScene estateScene = new EstateChooseScene(new Group(), stage);
-                estateScene.init();
-                stage.setScene(estateScene);
+                ProjectChooseScene projectChooseScene = new ProjectChooseScene(new Group(), stage,comboBox.getSelectionModel().getSelectedItem().toString(),comboBoxDist.getSelectionModel().getSelectedItem().toString());
+                projectChooseScene.init();
+                stage.setScene(projectChooseScene);
                 stage.show();
 
 

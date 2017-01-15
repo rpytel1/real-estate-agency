@@ -10,7 +10,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        stage.setTitle("Real Estate App");
+        stage.setTitle("Real EstateToChoose App");
         stage.setWidth(800);
         stage.setHeight(600);
         HomeScene homeScene=new HomeScene(new Group(),stage);

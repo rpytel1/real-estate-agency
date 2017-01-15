@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
  * Created by Rafal on 2017-01-13.
  */
 public class Client {
+    private final SimpleStringProperty id;
     private final SimpleStringProperty firstName;
     private final SimpleStringProperty lastName;
     private final SimpleStringProperty pesel;
@@ -13,12 +14,12 @@ public class Client {
 
 
 
-    public Client(String firstName, String lastName, String pesel, String companyName) {
+    public Client(String firstName, String lastName, String pesel, String companyName,String id) {
         this.firstName = new SimpleStringProperty(firstName);
         this.lastName =new SimpleStringProperty(lastName);
         this.pesel =new SimpleStringProperty(pesel);
         this.companyName = new SimpleStringProperty(companyName);
-
+        this.id=new SimpleStringProperty(id);
     }
 
     public String getFirstName() {
@@ -67,6 +68,12 @@ public class Client {
 
     public void setCompanyName(String companyName) {
         this.companyName.set(companyName);
+    }
+    public String getId(){
+        return id.get();
+    }
+    public void setId(String ID){
+        this.id.set(ID);
     }
 
 }
