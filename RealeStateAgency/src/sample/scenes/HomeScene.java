@@ -46,8 +46,6 @@ public class HomeScene extends Scene {
     public void init() {
         tableHandle();
         initScene(table);
-
-
     }
 
     public void initScene(TableView<?> tV) {
@@ -60,7 +58,17 @@ public class HomeScene extends Scene {
         vboxOptions.setPadding(new Insets(10, 0, 0, 10));
         VBox actionVbox = new VBox();
         Label label1 = new Label("Possible actions");
-        Button button = new Button("Find best estates for clients");
+        Button findEstatesForClient = new Button("Find best estates for clients");
+        findEstatesForClient.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Stage addStage = new Stage();
+                FindEstatesForClient fEfC = new FindEstatesForClient(new Group());
+                fEfC.init();
+                addStage.setScene(fEfC);
+                addStage.show();
+            }
+        });
         Button addTotallyNewEstate = new Button("Add totally new EstateToChoose");
         addTotallyNewEstate.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -81,7 +89,7 @@ public class HomeScene extends Scene {
                 setupDev(actionVbox);
             }
         });
-        vboxOptions.getChildren().addAll(label1, button, addTotallyNewEstate, findNewDevOffers, actionVbox);
+        vboxOptions.getChildren().addAll(label1, findEstatesForClient, addTotallyNewEstate, findNewDevOffers, actionVbox);
         hboxMain.setSpacing(5);
         hboxMain.setPadding(new Insets(10, 0, 0, 10));
         hboxMain.getChildren().addAll(vbox, vboxOptions);
@@ -115,6 +123,10 @@ public class HomeScene extends Scene {
 
 
         hb.setSpacing(3);
+    }
+
+    public void chooseClient(VBox actionVbox) {
+
     }
 
     public void setupDev(VBox actionVbox) {

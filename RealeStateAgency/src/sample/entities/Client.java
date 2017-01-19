@@ -2,6 +2,9 @@ package sample.entities;
 
 import javafx.beans.property.SimpleStringProperty;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Rafal on 2017-01-13.
  */
@@ -11,6 +14,7 @@ public class Client {
     private final SimpleStringProperty lastName;
     private final SimpleStringProperty pesel;
     private final SimpleStringProperty companyName;
+    private final Preferences preferences;
 
 
 
@@ -20,6 +24,13 @@ public class Client {
         this.pesel =new SimpleStringProperty(pesel);
         this.companyName = new SimpleStringProperty(companyName);
         this.id=new SimpleStringProperty(id);
+
+        List<String> neighborhoodList = new ArrayList<String>();
+        neighborhoodList.add("Saska");
+        neighborhoodList.add("Ursynow");
+
+
+        preferences = new Preferences(neighborhoodList,35,60,1,7,true,this.getId());
     }
 
     public String getFirstName() {
