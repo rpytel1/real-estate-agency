@@ -6,12 +6,12 @@ import javafx.beans.property.SimpleStringProperty;
  * Created by Rafal on 2017-01-15.
  */
 public class EstateToChoose {
-    private SimpleStringProperty adress;
-    private SimpleStringProperty area;
-    private SimpleStringProperty roomNumber;
-    private SimpleStringProperty floor;
-    private SimpleStringProperty elevator;
-    private SimpleStringProperty id;
+    private SimpleStringProperty adress;//Budynek
+    private SimpleStringProperty area;//n
+    private SimpleStringProperty roomNumber;//n
+    private SimpleStringProperty floor;//n
+    private SimpleStringProperty elevator;//b
+    private SimpleStringProperty id;//n
 
     public EstateToChoose(String add, String ar, String rNum, String fl, String elev, String ID) {
         adress = new SimpleStringProperty(add);

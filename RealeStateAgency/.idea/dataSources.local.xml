@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="dataSourceStorageLocal">
-    <data-source name="Oracle - @localhost" uuid="aa2975aa-394d-4358-b4fa-bb6ee08d816c">
-      <secret-storage>master_key</secret-storage>
-      <first-sync>true</first-sync>
-      <user-name>SYSTEM</user-name>
-    </data-source>
+    <data-source name="Oracle - @localhost" uuid="aa2975aa-394d-4358-b4fa-bb6ee08d816c" />
     <data-source name="Oracle - @localhost [2]" uuid="11d7b448-9809-4423-b06d-b864833b9d85">
-      <secret-storage>master_key</secret-storage>
-      <first-sync>true</first-sync>
       <user-name>rpytel</user-name>
     </data-source>
   </component>

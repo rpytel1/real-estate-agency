@@ -12,7 +12,11 @@ import sample.entities.Client;
 import sample.entities.EstateToChoose;
 import sample.entities.Person;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.EmptyStackException;
+import java.util.Properties;
 
 /**
  * Created by Rafal on 2017-01-13.
@@ -38,6 +42,7 @@ public class EstateChooseScene extends HomeScene {
         makeEstateTable();
         initScene(tableV);
     }
+
 
     public void makeEstateTable() {
         tableV.setEditable(true);

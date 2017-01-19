@@ -15,7 +15,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import sample.components.CustomLongLabel;
+import sample.entities.EstateToChoose;
 import sample.entities.Person;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Rafal on 2017-01-13.
@@ -46,6 +51,22 @@ public class HomeScene extends Scene {
     public void init() {
         tableHandle();
         initScene(table);
+
+        try {
+            Connection con = getConnection();
+            System.out.println("Got Connection");
+            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Connection getConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        Connection connection = null;
+        connection = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:rpytel", "rpytel", "rpytel");
+        return connection;
     }
 
     public void initScene(TableView<?> tV) {
@@ -98,6 +119,49 @@ public class HomeScene extends Scene {
 
 
     }
+    public void getEstateCharacters(Connection con) throws SQLException {
+        PreparedStatement ps =con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
+        ResultSet rs=ps.executeQuery();
+        List<Integer> indexes=new ArrayList();
+        while(rs.next()){
+            indexes.add(rs.getInt("id_nieruchomosci"));
+        }
+        String area,roomNum,level;
+       for(int i : indexes) {
+           PreparedStatement st = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc Natural JOIN cecha;");
+           rs = st.executeQuery();
+           while (rs.next()) {
+               switch (rs.getString("nazwa_cechy")) {
+                   case "powierzchnia":
+                       area=rs.getString("wartosc");
+                       break;
+                   case "ilosc_pokoi":
+                       roomNum=rs.getString("wartosc");
+                       break;
+                   case "pietro":
+                        level=rs.getString("wartosc");
+                       break;
+               }
+
+
+              // EstateToChoose estate=new EstateToChoose();
+
+           }
+       }
+    }
+    public void prepareTable(){
+        try {
+            Connection con = getConnection();
+            System.out.println("Got Connection");
+            PreparedStatement st = con.prepareStatement("Select * from budynek");
+            ResultSet rs = st.executeQuery();
+            while(rs.next())
+                System.out.println(rs.getString("id_budynku"));
+            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void tableHandle() {
         table.setEditable(true);
@@ -149,7 +213,7 @@ public class HomeScene extends Scene {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("EstateScene!");
-                ProjectChooseScene projectChooseScene = new ProjectChooseScene(new Group(), stage,comboBox.getSelectionModel().getSelectedItem().toString(),comboBoxDist.getSelectionModel().getSelectedItem().toString());
+                ProjectChooseScene projectChooseScene = new ProjectChooseScene(new Group(), stage, comboBox.getSelectionModel().getSelectedItem().toString(), comboBoxDist.getSelectionModel().getSelectedItem().toString());
                 projectChooseScene.init();
                 stage.setScene(projectChooseScene);
                 stage.show();
