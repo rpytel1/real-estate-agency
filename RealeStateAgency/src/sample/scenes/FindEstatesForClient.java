@@ -16,12 +16,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import sample.components.CustomLongLabel;
-import sample.entities.Client;
-import sample.entities.EstateToChoose;
-import sample.entities.Person;
-import sample.entities.Project;
+import sample.entities.*;
 
+import javax.xml.transform.Result;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.EmptyStackException;
+import java.util.List;
 
 /**
  * Created by Pawel on 1/17/2017.
@@ -46,6 +47,10 @@ public class FindEstatesForClient extends Scene{
                     new EstateToChoose("Kleszczowa 1 b", "45", "4", "0", "0","2"),
                     new EstateToChoose("Warszawska 11b", "123", "2", "4", "3","4"));
 
+    protected ObservableList<EstateToChoose> userData;
+
+    protected List<Client> clientList = new ArrayList<Client>();
+    protected ObservableList<String> options = FXCollections.observableArrayList("Pawel Zgoda");
 
     final HBox hb = new HBox();
 
@@ -54,8 +59,112 @@ public class FindEstatesForClient extends Scene{
     }
 
     public void init(){
+
+        try {
+            Connection con=getConnection();
+            getClientList(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         makeEstateTable(data);
         initScene(table);
+    }
+
+    public Connection getConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        Connection connection = null;
+        connection = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:rpytel", "rpytel", "rpytel");
+        return connection;
+    }
+
+    public void getClientList(Connection con) throws SQLException {
+        PreparedStatement ps = con.prepareStatement("SELECT * from klient");
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()){
+            String imie = rs.getString("imie");
+            String nazwisko = rs.getString("nazwisko");
+            String pesel = rs.getString("PESEL");
+            Client client = new Client(imie, nazwisko, pesel);
+            clientList.add(client);
+            options.add(client.getFirstName() + " " + client.getLastName());
+        }
+    }
+
+    public ObservableList<EstateToChoose> getEstateTable(Connection con, String pesel) throws SQLException {
+
+        ObservableList<EstateToChoose> data = FXCollections.observableArrayList();
+
+        PreparedStatement st1 = con.prepareStatement("SELECT * from Preferencja_cechy NATURAL JOIN Preferencja NATURAL JOIN Cecha NATURAL JOIN Klient Where pesel='" + pesel + "'");
+        ResultSet rs1 = st1.executeQuery();
+
+        Integer powierzchnia_min = 0;
+        Integer powierzchnia_max = 0;
+        Integer ilosc_pokoi = 0;
+        Integer pietro_min = 0;
+        Integer pietro_max = 0;
+
+        while (rs1.next()) {
+
+
+            switch (rs1.getString("nazwa_cechy")) {
+                case "powierzchnia_min":
+                    powierzchnia_min = rs1.getInt("wartosc");
+                    break;
+                case "powierzchnia_max":
+                    powierzchnia_max = rs1.getInt("wartosc");
+                    break;
+                case "ilosc_pokoi":
+                    ilosc_pokoi = rs1.getInt("wartosc");
+                    break;
+                case "pietro_min":
+                    pietro_min = rs1.getInt("wartosc");
+                    break;
+                case "pietro_max":
+                    pietro_max = rs1.getInt("wartosc");
+                    break;
+            }
+        }
+
+        Preferences preferences = new Preferences(powierzchnia_min, powierzchnia_max, pietro_min, pietro_max, ilosc_pokoi);
+
+        PreparedStatement st2 = con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
+        ResultSet rs2 = st2.executeQuery();
+        List<Integer> indexes = new ArrayList();
+        while (rs2.next()) {
+            indexes.add(rs2.getInt("id_nieruchomosci"));
+        }
+
+        for (Integer i : indexes) {
+
+            Integer area = 0;
+            Integer numberOfRooms = 0;
+            Integer level = 0;
+
+            PreparedStatement st3 = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc Natural JOIN cecha WHERE id_nieruchomosci='" + i + "'");
+            ResultSet rs3 = st3.executeQuery();
+            while (rs3.next()) {
+                switch (rs3.getString("nazwa_cechy")) {
+                    case "powierzchnia":
+                        area = rs3.getInt("wartosc");
+                        break;
+                    case "ilosc_pokoi":
+                        numberOfRooms = rs3.getInt("wartosc");
+                        break;
+                    case "pietro":
+                        level = rs3.getInt("wartosc");
+                        break;
+                }
+
+                EstateToChoose nieruchomosc = new EstateToChoose(area.toString(), numberOfRooms.toString(), level.toString());
+                //Tutaj warunek dodawania nieruchomosci do tabeli
+                if (true) {
+                    data.add(nieruchomosc);
+                }
+            }
+
+        }
+        return data;
     }
 
     public void initScene(TableView<?> tV) {
@@ -81,7 +190,6 @@ public class FindEstatesForClient extends Scene{
     public void setupDev(VBox actionVbox) {
         HBox hboxDev = new HBox();
         CustomLongLabel lab = new CustomLongLabel("Select a Client: ");
-        ObservableList<String> options = FXCollections.observableArrayList("Rafal Pytel", "Piotr Kucharski", "Pawel Zgoda");
         final ComboBox comboBox = new ComboBox(options);
         comboBox.setValue(options.get(0));
         comboBox.setVisibleRowCount(5);
@@ -92,13 +200,15 @@ public class FindEstatesForClient extends Scene{
             @Override
             public void handle(ActionEvent event) {
                 table.setEditable(true);
-                switch(comboBox.getValue().toString()){
-                    case "Rafal Pytel":
-                        table.setItems(data2);
-                        break;
-                    default:
-                        table.setItems(data);
+                String pesel = new String();
+                for(Client client : clientList){
+                    if(comboBox.getValue().toString() == (client.getFirstName().toString()+" "+client.getLastName().toString())){
+                        pesel = client.getPesel().toString();
+                    }
                 }
+
+
+                //table.setItems(data); to jak juz stworzysz data
                 table.setEditable(false);
             }
         });

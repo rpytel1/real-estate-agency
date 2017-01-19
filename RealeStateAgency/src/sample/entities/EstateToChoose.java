@@ -22,6 +22,16 @@ public class EstateToChoose {
         id = new SimpleStringProperty(ID);
     }
 
+    public EstateToChoose(String ar, String rNum, String fl){
+        area = new SimpleStringProperty(ar);
+        roomNumber = new SimpleStringProperty(rNum);
+        floor = new SimpleStringProperty(fl);
+        adress = new SimpleStringProperty();
+        elevator = new SimpleStringProperty();
+        id = new SimpleStringProperty();
+
+    }
+
     public String getId() {
         return id.get();
     }

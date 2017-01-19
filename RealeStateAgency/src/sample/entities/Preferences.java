@@ -20,6 +20,19 @@ public class Preferences {
     private Integer maxFloor;
     private Boolean elevator;
     private SimpleStringProperty id;
+    private Integer numberOfRooms;
+
+
+    public Preferences(Integer minArea, Integer maxArea, Integer minFloor, Integer maxFloor, Integer numberOfRooms){
+        this.minArea = minArea;
+        this.maxArea = maxArea;
+        this.minFloor = minFloor;
+        this.maxFloor = maxFloor;
+        this.numberOfRooms = numberOfRooms;
+
+        this.neighborhood = new ArrayList<>();
+    }
+
 
     public Preferences(List<String> neighborhood, Integer minArea, Integer maxArea, Integer minFloor, Integer maxFloor, boolean elevator, String id) {
         this.neighborhood = new ArrayList<String>();
@@ -32,6 +45,7 @@ public class Preferences {
         this.maxFloor = maxFloor;
         this.elevator = elevator;
         this.id = new SimpleStringProperty(id);
+        this.numberOfRooms = 0;
     }
 
     public String getId() {

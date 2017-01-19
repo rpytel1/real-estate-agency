@@ -14,9 +14,15 @@ public class Client {
     private final SimpleStringProperty lastName;
     private final SimpleStringProperty pesel;
     private final SimpleStringProperty companyName;
-    private final Preferences preferences;
 
 
+    public Client(String firstName, String lastName, String pesel){
+        this.firstName = new SimpleStringProperty(firstName);
+        this.lastName = new SimpleStringProperty(lastName);
+        this.pesel = new SimpleStringProperty(pesel);
+        this.id = new SimpleStringProperty();
+        this.companyName = new SimpleStringProperty();
+    }
 
     public Client(String firstName, String lastName, String pesel, String companyName,String id) {
         this.firstName = new SimpleStringProperty(firstName);
@@ -25,12 +31,6 @@ public class Client {
         this.companyName = new SimpleStringProperty(companyName);
         this.id=new SimpleStringProperty(id);
 
-        List<String> neighborhoodList = new ArrayList<String>();
-        neighborhoodList.add("Saska");
-        neighborhoodList.add("Ursynow");
-
-
-        preferences = new Preferences(neighborhoodList,35,60,1,7,true,this.getId());
     }
 
     public String getFirstName() {
