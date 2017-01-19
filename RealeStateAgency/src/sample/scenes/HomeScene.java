@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import sample.components.CustomLongLabel;
 import sample.entities.EstateToChoose;
 import sample.entities.Person;
@@ -27,18 +28,14 @@ import java.util.List;
  */
 public class HomeScene extends Scene {
 
-    protected TableView<Person> table = new TableView<Person>();
+    protected TableView<EstateToChoose> table = new TableView<EstateToChoose>();
     BorderPane border = new BorderPane();
     final HBox hboxMain = new HBox();
     protected Stage stage;
 
-    protected final ObservableList<Person> data =
-            FXCollections.observableArrayList(
-                    new Person("Jacob", "Smith", "jacob.smith@example.com"),
-                    new Person("Isabella", "Johnson", "isabella.johnson@example.com"),
-                    new Person("Ethan", "Williams", "ethan.williams@example.com"),
-                    new Person("Emma", "Jones", "emma.jones@example.com"),
-                    new Person("Michael", "Brown", "michael.brown@example.com"));
+    protected final ObservableList<EstateToChoose> data =
+            FXCollections.observableArrayList();
+
 
     final HBox hb = new HBox();
 
@@ -119,16 +116,20 @@ public class HomeScene extends Scene {
 
 
     }
-    public void getEstateCharacters(Connection con) throws SQLException {
+    public void getEstateTable(Connection con) throws SQLException {
         PreparedStatement ps =con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
         ResultSet rs=ps.executeQuery();
         List<Integer> indexes=new ArrayList();
         while(rs.next()){
             indexes.add(rs.getInt("id_nieruchomosci"));
         }
-        String area,roomNum,level;
-       for(int i : indexes) {
-           PreparedStatement st = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc Natural JOIN cecha;");
+        String area=new String();
+        String roomNum=new String();
+        String level=new String();
+         String elevator=new String();
+        String add=new String();
+       for(Integer i : indexes) {
+           PreparedStatement st = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc Natural JOIN cecha");
            rs = st.executeQuery();
            while (rs.next()) {
                switch (rs.getString("nazwa_cechy")) {
@@ -142,48 +143,46 @@ public class HomeScene extends Scene {
                         level=rs.getString("wartosc");
                        break;
                }
+               PreparedStatement st2 = con.prepareStatement("SELECT ulica,winda from budynek Natural JOin bud_nieruchomosc NATURAL JOIN nieruchomosc");
+               rs = st2.executeQuery();
+               while(rs.next())
+               {
+                  add=rs.getString("ulica");
+                   elevator=rs.getString("winda");
+               }
 
-
-              // EstateToChoose estate=new EstateToChoose();
-
+               EstateToChoose estate=new EstateToChoose(add,area,roomNum,level,elevator,i.toString());
+               data.add(estate);
            }
        }
     }
-    public void prepareTable(){
+
+    public void tableHandle() {
         try {
-            Connection con = getConnection();
-            System.out.println("Got Connection");
-            PreparedStatement st = con.prepareStatement("Select * from budynek");
-            ResultSet rs = st.executeQuery();
-            while(rs.next())
-                System.out.println(rs.getString("id_budynku"));
-            con.close();
+            Connection con=getConnection();
+            getEstateTable(con);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void tableHandle() {
         table.setEditable(true);
+        TableColumn adressCol = new TableColumn("Adress");
+        adressCol.setMinWidth(100);
+        adressCol.setCellValueFactory(new PropertyValueFactory<EstateToChoose, String>("adress"));
+        TableColumn areaCol = new TableColumn("Area");
+        areaCol.setCellValueFactory(new PropertyValueFactory<EstateToChoose, String>("area"));
+        TableColumn roomNumCol = new TableColumn("Room Number");
+        roomNumCol.setCellValueFactory(new PropertyValueFactory<EstateToChoose, String>("roomNumber"));
+        TableColumn floorCol = new TableColumn("Floor");
+        floorCol.setCellValueFactory(new PropertyValueFactory<EstateToChoose, String>("floor"));
+        TableColumn elevatorNum = new TableColumn("Elevator Number");
+        elevatorNum.setCellValueFactory(new PropertyValueFactory<EstateToChoose, String>("elevator"));
 
-        TableColumn firstNameCol = new TableColumn("First Name");
-        firstNameCol.setMinWidth(100);
-        firstNameCol.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("firstName"));
-        firstNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        TableColumn lastNameCol = new TableColumn("Last Name");
-        lastNameCol.setMinWidth(100);
-        lastNameCol.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("lastName"));
-        lastNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        TableColumn emailCol = new TableColumn("Email");
-        emailCol.setMinWidth(200);
-        emailCol.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("email"));
+        TableColumn actionCol = new TableColumn("Action");
+        actionCol.setCellValueFactory(new PropertyValueFactory<>("DUMMY"));
 
         table.setItems(data);
-        table.getColumns().addAll(firstNameCol, lastNameCol, emailCol);
+        table.getColumns().addAll(adressCol, areaCol, roomNumCol, floorCol,elevatorNum);
 
 
         hb.setSpacing(3);
