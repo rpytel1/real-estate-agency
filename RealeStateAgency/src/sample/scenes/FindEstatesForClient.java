@@ -19,6 +19,7 @@ import sample.components.CustomLongLabel;
 import sample.entities.*;
 
 import javax.xml.transform.Result;
+import java.io.Console;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * Created by Pawel on 1/17/2017.
  */
-public class FindEstatesForClient extends Scene{
+public class FindEstatesForClient extends Scene {
 
     protected TableView<EstateToChoose> table = new TableView<EstateToChoose>();
     BorderPane border = new BorderPane();
@@ -37,12 +38,12 @@ public class FindEstatesForClient extends Scene{
 
     protected Connection con;
 
-    protected ObservableList<EstateToChoose> data =  FXCollections.observableArrayList();
+    protected ObservableList<EstateToChoose> data = FXCollections.observableArrayList();
 
     protected final ObservableList<EstateToChoose> data2 =
             FXCollections.observableArrayList(
-                    new EstateToChoose("Kleszczowa 1 b", "45", "4", "0", "0","2"),
-                    new EstateToChoose("Warszawska 11b", "123", "2", "4", "3","4"));
+                    new EstateToChoose("Kleszczowa 1 b", "45", "4", "0", "0", "2"),
+                    new EstateToChoose("Warszawska 11b", "123", "2", "4", "3", "4"));
 
     protected ObservableList<EstateToChoose> userData;
 
@@ -55,10 +56,10 @@ public class FindEstatesForClient extends Scene{
         super(group);
     }
 
-    public void init(){
+    public void init() {
 
         try {
-            con=getConnection();
+            con = getConnection();
             getClientList(con);
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,7 +79,7 @@ public class FindEstatesForClient extends Scene{
     public void getClientList(Connection con) throws SQLException {
         PreparedStatement ps = con.prepareStatement("SELECT * from klient");
         ResultSet rs = ps.executeQuery();
-        while (rs.next()){
+        while (rs.next()) {
             String imie = rs.getString("imie");
             String nazwisko = rs.getString("nazwisko");
             String pesel = rs.getString("PESEL");
@@ -99,22 +100,21 @@ public class FindEstatesForClient extends Scene{
             indexes.add(rs2.getInt("id_nieruchomosci"));
         }
 
-        PreparedStatement st1 = con.prepareStatement("SELECT * from nieruchomosc INNER JOIN nieruch_cechy on nieruchomosc.id_nieruchomosci = nieruch_cechy.id_nieruchomosci INNER JOIN preferencja_cechy on nieruch_cechy.id_cechy = preferencja_cechy.id_cechy" +
-                "INNER JOIN preferencja on preferencja.id_preferencji = preferencja_cechy.id_preferencji INNER JOIN cecha on cecha.id_cechy = preferencja_cechy.id_cechy" +
-                "WHERE id_klienta = 95031110214 AND ((nazwa_cechy = 'powierzchnia' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR" +
+        PreparedStatement st1 = con.prepareStatement("SELECT * from nieruchomosc INNER JOIN nieruch_cechy on nieruchomosc.id_nieruchomosci = nieruch_cechy.id_nieruchomosci INNER JOIN preferencja_cechy on nieruch_cechy.id_cechy = preferencja_cechy.id_cechy " +
+                "INNER JOIN preferencja on preferencja.id_preferencji = preferencja_cechy.id_preferencji INNER JOIN cecha on cecha.id_cechy = preferencja_cechy.id_cechy " +
+                "WHERE id_klienta = 95031110214 AND ((nazwa_cechy = 'powierzchnia' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR " +
                 "(nazwa_cechy = 'ilosc_pokoi' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR (nazwa_cechy = 'pietro' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart))");
-        //st1.setInt(1,new Integer(pesel));
         ResultSet rs1 = st1.executeQuery();
 
-        for (Integer i : indexes){
+        for (Integer i : indexes) {
 
             String powierzchnia = new String();
             String ilosc_pokoi = new String();
             String pietro = new String();
 
-            while(rs1.next()){
-                if(rs1.getInt("id_nieruchomosci") == i){
-                    switch (rs1.getString("nazwa_cechy")){
+            while (rs1.next()) {
+                if (rs1.getInt("id_nieruchomosci") == i) {
+                    switch (rs1.getString("nazwa_cechy")) {
                         case "powierzchnia":
                             powierzchnia = rs1.getString("wartosc");
                             break;
@@ -127,7 +127,7 @@ public class FindEstatesForClient extends Scene{
                     }
                 }
             }
-            EstateToChoose nieruchomosc = new EstateToChoose(powierzchnia,ilosc_pokoi,pietro);
+            EstateToChoose nieruchomosc = new EstateToChoose(powierzchnia, ilosc_pokoi, pietro);
             data.add(nieruchomosc);
         }
 
@@ -168,10 +168,10 @@ public class FindEstatesForClient extends Scene{
             public void handle(ActionEvent event) {
                 table.setEditable(true);
                 String pesel = new String();
-                try{
-                    data = getEstateTable(con,"95031110214");
+                try {
+                    data = getEstateTable(con, "95031110214");
                     table.setItems(data);
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 table.setEditable(false);
@@ -190,7 +190,7 @@ public class FindEstatesForClient extends Scene{
 //                }
             }
         });
-        actionVbox.setPadding(new Insets(10,10,0,0));
+        actionVbox.setPadding(new Insets(10, 10, 0, 0));
         actionVbox.getChildren().addAll(hboxDev, hboxDistrict, show);
 
     }
@@ -250,7 +250,7 @@ public class FindEstatesForClient extends Scene{
 
         actionCol.setCellFactory(cellFactory);
         table.setItems(data);
-        table.getColumns().addAll(adressCol, areaCol, roomNumCol, floorCol,elevatorNum, actionCol);
+        table.getColumns().addAll(adressCol, areaCol, roomNumCol, floorCol, elevatorNum, actionCol);
 
 
     }
