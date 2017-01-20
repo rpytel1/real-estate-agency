@@ -35,12 +35,9 @@ public class FindEstatesForClient extends Scene{
     protected Stage stage;
     protected final VBox vbox = new VBox();
 
-    protected final ObservableList<EstateToChoose> data =
-            FXCollections.observableArrayList(
-                    new EstateToChoose("Wiazowa 11 a", "56", "3", "1", "1","1"),
-                    new EstateToChoose("Kleszczowa 1 b", "45", "4", "0", "0","2"),
-                    new EstateToChoose("BlaStreet 10b", "102", "6", "12", "2","3"),
-                    new EstateToChoose("Warszawska 11b", "123", "2", "4", "3","4"));
+    protected Connection con;
+
+    protected ObservableList<EstateToChoose> data =  FXCollections.observableArrayList();
 
     protected final ObservableList<EstateToChoose> data2 =
             FXCollections.observableArrayList(
@@ -50,7 +47,7 @@ public class FindEstatesForClient extends Scene{
     protected ObservableList<EstateToChoose> userData;
 
     protected List<Client> clientList = new ArrayList<Client>();
-    protected ObservableList<String> options = FXCollections.observableArrayList("Pawel Zgoda");
+    protected ObservableList<String> options = FXCollections.observableArrayList();
 
     final HBox hb = new HBox();
 
@@ -61,7 +58,7 @@ public class FindEstatesForClient extends Scene{
     public void init(){
 
         try {
-            Connection con=getConnection();
+            con=getConnection();
             getClientList(con);
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,7 +71,7 @@ public class FindEstatesForClient extends Scene{
         Class.forName("oracle.jdbc.driver.OracleDriver");
         Connection connection = null;
         connection = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:rpytel", "rpytel", "rpytel");
+                "jdbc:oracle:thin:@localhost:1521:pzgodaf", "pzgodaf", "pzgodaf");
         return connection;
     }
 
@@ -95,39 +92,6 @@ public class FindEstatesForClient extends Scene{
 
         ObservableList<EstateToChoose> data = FXCollections.observableArrayList();
 
-        PreparedStatement st1 = con.prepareStatement("SELECT * from Preferencja_cechy NATURAL JOIN Preferencja NATURAL JOIN Cecha NATURAL JOIN Klient Where pesel='" + pesel + "'");
-        ResultSet rs1 = st1.executeQuery();
-
-        Integer powierzchnia_min = 0;
-        Integer powierzchnia_max = 0;
-        Integer ilosc_pokoi = 0;
-        Integer pietro_min = 0;
-        Integer pietro_max = 0;
-
-        while (rs1.next()) {
-
-
-            switch (rs1.getString("nazwa_cechy")) {
-                case "powierzchnia_min":
-                    powierzchnia_min = rs1.getInt("wartosc");
-                    break;
-                case "powierzchnia_max":
-                    powierzchnia_max = rs1.getInt("wartosc");
-                    break;
-                case "ilosc_pokoi":
-                    ilosc_pokoi = rs1.getInt("wartosc");
-                    break;
-                case "pietro_min":
-                    pietro_min = rs1.getInt("wartosc");
-                    break;
-                case "pietro_max":
-                    pietro_max = rs1.getInt("wartosc");
-                    break;
-            }
-        }
-
-        Preferences preferences = new Preferences(powierzchnia_min, powierzchnia_max, pietro_min, pietro_max, ilosc_pokoi);
-
         PreparedStatement st2 = con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
         ResultSet rs2 = st2.executeQuery();
         List<Integer> indexes = new ArrayList();
@@ -135,35 +99,38 @@ public class FindEstatesForClient extends Scene{
             indexes.add(rs2.getInt("id_nieruchomosci"));
         }
 
-        for (Integer i : indexes) {
+        PreparedStatement st1 = con.prepareStatement("SELECT * from nieruchomosc INNER JOIN nieruch_cechy on nieruchomosc.id_nieruchomosci = nieruch_cechy.id_nieruchomosci INNER JOIN preferencja_cechy on nieruch_cechy.id_cechy = preferencja_cechy.id_cechy" +
+                "INNER JOIN preferencja on preferencja.id_preferencji = preferencja_cechy.id_preferencji INNER JOIN cecha on cecha.id_cechy = preferencja_cechy.id_cechy" +
+                "WHERE id_klienta = 95031110214 AND ((nazwa_cechy = 'powierzchnia' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR" +
+                "(nazwa_cechy = 'ilosc_pokoi' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR (nazwa_cechy = 'pietro' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart))");
+        //st1.setInt(1,new Integer(pesel));
+        ResultSet rs1 = st1.executeQuery();
 
-            Integer area = 0;
-            Integer numberOfRooms = 0;
-            Integer level = 0;
+        for (Integer i : indexes){
 
-            PreparedStatement st3 = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc Natural JOIN cecha WHERE id_nieruchomosci='" + i + "'");
-            ResultSet rs3 = st3.executeQuery();
-            while (rs3.next()) {
-                switch (rs3.getString("nazwa_cechy")) {
-                    case "powierzchnia":
-                        area = rs3.getInt("wartosc");
-                        break;
-                    case "ilosc_pokoi":
-                        numberOfRooms = rs3.getInt("wartosc");
-                        break;
-                    case "pietro":
-                        level = rs3.getInt("wartosc");
-                        break;
-                }
+            String powierzchnia = new String();
+            String ilosc_pokoi = new String();
+            String pietro = new String();
 
-                EstateToChoose nieruchomosc = new EstateToChoose(area.toString(), numberOfRooms.toString(), level.toString());
-                //Tutaj warunek dodawania nieruchomosci do tabeli
-                if (true) {
-                    data.add(nieruchomosc);
+            while(rs1.next()){
+                if(rs1.getInt("id_nieruchomosci") == i){
+                    switch (rs1.getString("nazwa_cechy")){
+                        case "powierzchnia":
+                            powierzchnia = rs1.getString("wartosc");
+                            break;
+                        case "ilosc_pokoi":
+                            ilosc_pokoi = rs1.getString("wartosc");
+                            break;
+                        case "pietro":
+                            pietro = rs1.getString("wartosc");
+                            break;
+                    }
                 }
             }
-
+            EstateToChoose nieruchomosc = new EstateToChoose(powierzchnia,ilosc_pokoi,pietro);
+            data.add(nieruchomosc);
         }
+
         return data;
     }
 
@@ -201,15 +168,26 @@ public class FindEstatesForClient extends Scene{
             public void handle(ActionEvent event) {
                 table.setEditable(true);
                 String pesel = new String();
-                for(Client client : clientList){
-                    if(comboBox.getValue().toString() == (client.getFirstName().toString()+" "+client.getLastName().toString())){
-                        pesel = client.getPesel().toString();
-                    }
+                try{
+                    data = getEstateTable(con,"95031110214");
+                    table.setItems(data);
+                }catch(Exception e){
+                    e.printStackTrace();
                 }
-
-
-                //table.setItems(data); to jak juz stworzysz data
                 table.setEditable(false);
+//                for(Client client : clientList){
+//                    System.out.print(client.getFirstName() + " " +client.getLastName());
+//                    System.out.print(comboBox.getValue().toString());
+//                    if(comboBox.getValue().toString().equals(client.getFirstName().toString()+" "+client.getLastName().toString())){
+//                        pesel = client.getPesel().toString();
+//                        try {
+//                            data=getEstateTable(con,pesel);
+//                            table.setItems(data);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
             }
         });
         actionVbox.setPadding(new Insets(10,10,0,0));

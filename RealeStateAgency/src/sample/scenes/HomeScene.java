@@ -62,7 +62,7 @@ public class HomeScene extends Scene {
         Class.forName("oracle.jdbc.driver.OracleDriver");
         Connection connection = null;
         connection = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:rpytel", "rpytel", "rpytel");
+                "jdbc:oracle:thin:@localhost:1521:pzgodaf", "pzgodaf", "pzgodaf");
         return connection;
     }
 
