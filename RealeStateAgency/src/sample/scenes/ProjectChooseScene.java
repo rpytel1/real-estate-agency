@@ -15,6 +15,11 @@ import sample.entities.Client;
 import sample.entities.Person;
 import sample.entities.Project;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * Created by Rafal on 2017-01-15.
  */
@@ -23,30 +28,58 @@ public class ProjectChooseScene extends HomeScene {
     private String developerId;
     private String district;
     Stage stage;
-    TableView tableView=new TableView();
-    protected final ObservableList<Project> data2 =
-            FXCollections.observableArrayList(
-                    new Project("proj1", "12-12-2012", "12-04-2017","2000000$","1"),
-                    new Project("proj2", "11-11-2014", "12-04-2017","2000003$","2"),
-                    new Project("proj3", "12-04-2018", "12-04-2017","2000003$","3"),
-                    new Project("proj4", "01-12-2006", "12-04-2017","2000003$","4"),
-                    new Project("proj5", "01-01-2012", "12-04-2017","2000003$","5"));
+    TableView tableView = new TableView();
+    protected final ObservableList<Project> data2 = FXCollections.observableArrayList();
 
-    public ProjectChooseScene(Group group, Stage stage, String dev, String district){
-        super(group,stage);
-        this.stage=stage;
-        developerId=dev;
-        this.district=district;
+    public ProjectChooseScene(Group group, Stage stage, String dev, String district) {
+        super(group, stage);
+        this.stage = stage;
+        developerId = dev;
+        this.district = district;
     }
 
     @Override
-    public void init(){
+    public void init() {
         makeProjectTable();
         initScene(tableView);
     }
-    public void makeProjectTable(){
+
+    public void getProjects() {
+        try {
+            Connection con = getConnection();
+
+            PreparedStatement ps = con.prepareStatement("SELECT projekt.nazwa,projekt.data_rozpoczecia_budowy," +
+                    "projekt.data_ukonczenia,projekt.koszt,projekt.id_projektu FROM projekt\n" +
+                    "  INNER JOIN osiedle_projekt ON projekt.id_projektu = osiedle_projekt.id_projektu\n" +
+                    "  INNER JOIN osiedle ON osiedle.id_osiedla=osiedle_projekt.id_osiedla\n" +
+                    "  INNER JOIN dzielnica_osiedle ON osiedle.id_osiedla = dzielnica_osiedle.id_osiedla\n" +
+                    "INNER JOIN dzielnica ON dzielnica_osiedle.id_dzielnicy=dzielnica.id_dzielnicy\n" +
+                    "  INNER JOIN deweloper ON projekt.nip_developera=deweloper.NIP WHERE deweloper.nazwa=? ");
+            ps.setString(1, developerId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("nazwa");
+                String dateStart = rs.getString("data_rozpoczecia_budowy");
+                String dateEnd = rs.getString("data_ukonczenia");
+                String cost = rs.getString("koszt");
+                String id = rs.getString("id_projektu");
+                Project proj = new Project(name, dateStart, dateEnd, cost, id);
+                data2.add(proj);
+
+            }
+
+            con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void makeProjectTable() {
 
         tableView.setEditable(true);
+        getProjects();
         TableColumn projectNameCol = new TableColumn("Project Name");
         projectNameCol.setMinWidth(100);
         projectNameCol.setCellValueFactory(new PropertyValueFactory<Project, String>("name"));
@@ -80,7 +113,7 @@ public class ProjectChooseScene extends HomeScene {
                                         Project project
                                                 = getTableView().getItems().get(getIndex());
                                         System.out.println(project.getId());
-                                        EstateChooseScene estateChooseScene = new EstateChooseScene(new Group(), stage,project.getId());
+                                        EstateChooseScene estateChooseScene = new EstateChooseScene(new Group(), stage, project.getId());
                                         estateChooseScene.init();
                                         stage.setScene(estateChooseScene);
                                         stage.show();

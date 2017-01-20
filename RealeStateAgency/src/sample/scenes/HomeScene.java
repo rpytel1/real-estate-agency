@@ -1,5 +1,7 @@
 package sample.scenes;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -33,8 +35,10 @@ public class HomeScene extends Scene {
     final HBox hboxMain = new HBox();
     protected Stage stage;
 
-    protected final ObservableList<EstateToChoose> data =
-            FXCollections.observableArrayList();
+    protected final ObservableList<EstateToChoose> data = FXCollections.observableArrayList();
+    protected final ObservableList<String> devs = FXCollections.observableArrayList();
+
+    protected final ObservableList<String> regions = FXCollections.observableArrayList();
 
 
     final HBox hb = new HBox();
@@ -62,7 +66,7 @@ public class HomeScene extends Scene {
         Class.forName("oracle.jdbc.driver.OracleDriver");
         Connection connection = null;
         connection = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:pzgodaf", "pzgodaf", "pzgodaf");
+                "jdbc:oracle:thin:@localhost:1521:rpytel", "rpytel", "rpytel");
         return connection;
     }
 
@@ -116,51 +120,59 @@ public class HomeScene extends Scene {
 
 
     }
+
     public void getEstateTable(Connection con) throws SQLException {
-        PreparedStatement ps =con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
-        ResultSet rs=ps.executeQuery();
-        List<Integer> indexes=new ArrayList();
-        while(rs.next()){
+        PreparedStatement ps = con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
+        ResultSet rs = ps.executeQuery();
+        List<Integer> indexes = new ArrayList();
+        while (rs.next()) {
             indexes.add(rs.getInt("id_nieruchomosci"));
         }
-        String area=new String();
-        String roomNum=new String();
-        String level=new String();
-         String elevator=new String();
-        String add=new String();
-       for(Integer i : indexes) {
-           PreparedStatement st = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc Natural JOIN cecha");
-           rs = st.executeQuery();
-           while (rs.next()) {
-               switch (rs.getString("nazwa_cechy")) {
-                   case "powierzchnia":
-                       area=rs.getString("wartosc");
-                       break;
-                   case "ilosc_pokoi":
-                       roomNum=rs.getString("wartosc");
-                       break;
-                   case "pietro":
-                        level=rs.getString("wartosc");
-                       break;
-               }
-               PreparedStatement st2 = con.prepareStatement("SELECT ulica,winda from budynek Natural JOin bud_nieruchomosc NATURAL JOIN nieruchomosc");
-               rs = st2.executeQuery();
-               while(rs.next())
-               {
-                  add=rs.getString("ulica");
-                   elevator=rs.getString("winda");
-               }
 
-               EstateToChoose estate=new EstateToChoose(add,area,roomNum,level,elevator,i.toString());
-               data.add(estate);
-           }
-       }
+        for (Integer i : indexes) {
+            String area = new String();
+            String roomNum = new String();
+            String level = new String();
+            String elevator = new String();
+            String add = new String();
+            PreparedStatement st = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc " +
+                    "Natural JOIN cecha WHERE id_nieruchomosci=?");
+            st.setInt(1, i);
+            rs = st.executeQuery();
+            while (rs.next()) {
+                String charName = rs.getString("nazwa_cechy");
+                switch (charName) {
+                    case "powierzchnia":
+                        area = rs.getString("wartosc");
+                        break;
+                    case "ilosc_pokoi":
+                        roomNum = rs.getString("wartosc");
+                        break;
+                    case "pietro":
+                        level = rs.getString("wartosc");
+                        break;
+                }
+            }
+
+            PreparedStatement st2 = con.prepareStatement("SELECT ulica,winda from budynek Natural JOin bud_nieruchomosc NATURAL JOIN nieruchomosc WHERE id_nieruchomosci=?");
+            st2.setInt(1, i);
+            rs = st2.executeQuery();
+            while (rs.next()) {
+                add = rs.getString("ulica");
+                elevator = rs.getString("winda");
+            }
+
+            EstateToChoose estate = new EstateToChoose(add, area, roomNum, level, elevator, i.toString());
+            data.add(estate);
+        }
     }
+
 
     public void tableHandle() {
         try {
-            Connection con=getConnection();
+            Connection con = getConnection();
             getEstateTable(con);
+            con.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -182,27 +194,78 @@ public class HomeScene extends Scene {
         actionCol.setCellValueFactory(new PropertyValueFactory<>("DUMMY"));
 
         table.setItems(data);
-        table.getColumns().addAll(adressCol, areaCol, roomNumCol, floorCol,elevatorNum);
+        table.getColumns().addAll(adressCol, areaCol, roomNumCol, floorCol, elevatorNum);
 
 
         hb.setSpacing(3);
     }
 
-    public void chooseClient(VBox actionVbox) {
+    public void getDevOptions() {
+        try {
+            Connection con = getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT nazwa FROM deweloper");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                devs.add(rs.getString("nazwa"));
+            }
+            con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+    }
+
+    public void getDistrictOptions(String dev) {
+        try {
+            Connection con = getConnection();
+            //NIP
+            PreparedStatement ps = con.prepareStatement("SELECT dzielnica.nazwa FROM projekt\n" +
+                    "  INNER JOIN osiedle_projekt ON projekt.id_projektu = osiedle_projekt.id_projektu\n" +
+                    "  INNER JOIN osiedle ON osiedle.id_osiedla=osiedle_projekt.id_osiedla\n" +
+                    "  INNER JOIN dzielnica_osiedle ON osiedle.id_osiedla = dzielnica_osiedle.id_osiedla\n" +
+                    "INNER JOIN dzielnica ON dzielnica_osiedle.id_dzielnicy=dzielnica.id_dzielnicy\n" +
+                    "  INNER JOIN deweloper ON projekt.nip_developera=deweloper.NIP WHERE deweloper.nazwa=? ");
+            ps.setString(1, dev);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String str = rs.getString("nazwa");
+                if(!regions.contains(str))
+                regions.add(str);
+        }
+
+            // ps =con.prepareStatement()
+            con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setupDev(VBox actionVbox) {
         HBox hboxDev = new HBox();
+        getDevOptions();
         CustomLongLabel lab = new CustomLongLabel("Developer");
-        ObservableList<String> options = FXCollections.observableArrayList("dev1", "dev2", "dev3");
+        ObservableList<String> options = devs;
         final ComboBox comboBox = new ComboBox(options);
+
         comboBox.setVisibleRowCount(5);
         hboxDev.getChildren().addAll(lab, comboBox);
         HBox hboxDistrict = new HBox();
-        CustomLongLabel labDistrict = new CustomLongLabel("Developer");
-        ObservableList<String> optionsDistrict = FXCollections.observableArrayList("district1", "district2", "district3");
+        CustomLongLabel labDistrict = new CustomLongLabel("District");
+        ObservableList<String> optionsDistrict = regions;
         final ComboBox comboBoxDist = new ComboBox(optionsDistrict);
+        comboBox.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue ov, String t, String t1) {
+
+                System.out.println(t1);
+                getDistrictOptions(t1);
+                comboBoxDist.setItems(regions);
+            }
+        });
         comboBox.setVisibleRowCount(5);
         hboxDistrict.getChildren().addAll(labDistrict, comboBoxDist);
         Button send = new Button("Send");
