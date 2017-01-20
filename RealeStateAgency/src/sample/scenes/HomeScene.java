@@ -91,17 +91,6 @@ public class HomeScene extends Scene {
                 addStage.show();
             }
         });
-        Button addTotallyNewEstate = new Button("Add totally new EstateToChoose");
-        addTotallyNewEstate.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                Stage addStage = new Stage();
-                TotalNewEstateScene tnE = new TotalNewEstateScene(new Group());
-                tnE.init();
-                addStage.setScene(tnE);
-                addStage.show();
-            }
-        });
         Button findNewDevOffers = new Button("Find new offers from Developer");
         findNewDevOffers.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -111,7 +100,7 @@ public class HomeScene extends Scene {
                 setupDev(actionVbox);
             }
         });
-        vboxOptions.getChildren().addAll(label1, findEstatesForClient, addTotallyNewEstate, findNewDevOffers, actionVbox);
+        vboxOptions.getChildren().addAll(label1, findEstatesForClient, findNewDevOffers, actionVbox);
         hboxMain.setSpacing(5);
         hboxMain.setPadding(new Insets(10, 0, 0, 10));
         hboxMain.getChildren().addAll(vbox, vboxOptions);
