@@ -40,11 +40,6 @@ public class FindEstatesForClient extends Scene {
 
     protected ObservableList<EstateToChoose> data = FXCollections.observableArrayList();
 
-    protected final ObservableList<EstateToChoose> data2 =
-            FXCollections.observableArrayList(
-                    new EstateToChoose("Kleszczowa 1 b", "45", "4", "0", "0", "2"),
-                    new EstateToChoose("Warszawska 11b", "123", "2", "4", "3", "4"));
-
     protected ObservableList<EstateToChoose> userData;
 
     protected List<Client> clientList = new ArrayList<Client>();
@@ -92,45 +87,92 @@ public class FindEstatesForClient extends Scene {
     public ObservableList<EstateToChoose> getEstateTable(Connection con, String pesel) throws SQLException {
 
         ObservableList<EstateToChoose> data = FXCollections.observableArrayList();
-
-        PreparedStatement st2 = con.prepareStatement("SELECT id_nieruchomosci FROM nieruchomosc");
-        ResultSet rs2 = st2.executeQuery();
         List<Integer> indexes = new ArrayList();
-        while (rs2.next()) {
-            indexes.add(rs2.getInt("id_nieruchomosci"));
-        }
 
         PreparedStatement st1 = con.prepareStatement("SELECT * from nieruchomosc INNER JOIN nieruch_cechy on nieruchomosc.id_nieruchomosci = nieruch_cechy.id_nieruchomosci INNER JOIN preferencja_cechy on nieruch_cechy.id_cechy = preferencja_cechy.id_cechy " +
                 "INNER JOIN preferencja on preferencja.id_preferencji = preferencja_cechy.id_preferencji INNER JOIN cecha on cecha.id_cechy = preferencja_cechy.id_cechy " +
-                "WHERE id_klienta = 95031110214 AND ((nazwa_cechy = 'powierzchnia' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR " +
+                "WHERE id_klienta = ? AND ((nazwa_cechy = 'powierzchnia' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR " +
                 "(nazwa_cechy = 'ilosc_pokoi' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart) OR (nazwa_cechy = 'pietro' AND wartosc <= cecha_max_wart AND wartosc >= cecha_min_wart))");
+        st1.setString(1,pesel);
         ResultSet rs1 = st1.executeQuery();
-
-        for (Integer i : indexes) {
-
-            String powierzchnia = new String();
-            String ilosc_pokoi = new String();
-            String pietro = new String();
-
-            while (rs1.next()) {
-                if (rs1.getInt("id_nieruchomosci") == i) {
-                    switch (rs1.getString("nazwa_cechy")) {
-                        case "powierzchnia":
-                            powierzchnia = rs1.getString("wartosc");
-                            break;
-                        case "ilosc_pokoi":
-                            ilosc_pokoi = rs1.getString("wartosc");
-                            break;
-                        case "pietro":
-                            pietro = rs1.getString("wartosc");
-                            break;
+        while(rs1.next()){
+            Integer tmpIndex = rs1.getInt("id_nieruchomosci");
+            Boolean flag = false;
+            if(indexes.size()==0){
+                indexes.add(tmpIndex);
+            }else {
+                for (Integer i : indexes) {
+                    if (tmpIndex == i) {
+                        flag = true;
                     }
                 }
+                if(!flag){
+                    System.out.print(tmpIndex);
+                    indexes.add(tmpIndex);
+                }
             }
-            EstateToChoose nieruchomosc = new EstateToChoose(powierzchnia, ilosc_pokoi, pietro);
-            data.add(nieruchomosc);
+
         }
 
+        PreparedStatement st4 = con.prepareStatement("SELECT * FROM nieruchomosc INNER JOIN bud_nieruchomosc on bud_nieruchomosc.ID_NIERUCHOMOSCI = nieruchomosc.ID_NIERUCHOMOSCI INNER JOIN PROJEKT_BUDYNEK on PROJEKT_BUDYNEK.ID_BUDYNKU = bud_nieruchomosc.ID_BUDYNKU INNER JOIN osiedle_projekt on osiedle_projekt.ID_PROJEKTU = PROJEKT_BUDYNEK.ID_PROJEKTU INNER JOIN dzielnica_osiedle on dzielnica_osiedle.ID_OSIEDLA = osiedle_projekt.ID_OSIEDLA INNER JOIN DZIELNICA on DZIELNICA.ID_DZIELNICY=dzielnica_osiedle.ID_DZIELNICY INNER JOIN PREFERENCJA_CECHY on PREFERENCJA_CECHY.CECHA_MIN_WART = DZIELNICA.ID_DZIELNICY INNER JOIN preferencja on preferencja.id_preferencji = preferencja_cechy.id_preferencji WHERE id_cechy = '4' AND id_klienta = ?");
+        st4.setString(1,pesel);
+        ResultSet rs4 = st4.executeQuery();
+
+        while(rs4.next()){
+            Integer tmpIndex = rs4.getInt("id_nieruchomosci");
+            Boolean flag = false;
+            if(indexes.size()==0){
+                indexes.add(tmpIndex);
+            }else {
+                for (Integer i : indexes) {
+                    if (tmpIndex == i) {
+                        flag = true;
+                    }
+                }
+                if(!flag){
+                    System.out.print(tmpIndex);
+                    indexes.add(tmpIndex);
+                }
+            }
+
+        }
+
+        for (Integer i : indexes) {
+            String area = new String();
+            String roomNum = new String();
+            String level = new String();
+            String elevator = new String();
+            String add = new String();
+            PreparedStatement st2 = con.prepareStatement("SELECT * from nieruch_cechy NATURAL JOIN nieruchomosc " +
+                    "Natural JOIN cecha WHERE id_nieruchomosci=?");
+            st2.setInt(1, i);
+            ResultSet rs2 = st2.executeQuery();
+            while (rs2.next()) {
+                String charName = rs2.getString("nazwa_cechy");
+                switch (charName) {
+                    case "powierzchnia":
+                        area = rs2.getString("wartosc");
+                        break;
+                    case "ilosc_pokoi":
+                        roomNum = rs2.getString("wartosc");
+                        break;
+                    case "pietro":
+                        level = rs2.getString("wartosc");
+                        break;
+                }
+            }
+
+            PreparedStatement st3 = con.prepareStatement("SELECT ulica,winda from budynek Natural JOin bud_nieruchomosc NATURAL JOIN nieruchomosc WHERE id_nieruchomosci=?");
+            st3.setInt(1, i);
+            ResultSet rs3 = st3.executeQuery();
+            while (rs3.next()) {
+                add = rs3.getString("ulica");
+                elevator = rs3.getString("winda");
+            }
+
+            EstateToChoose estate = new EstateToChoose(add, area, roomNum, level, elevator, i.toString());
+            data.add(estate);
+        }
         return data;
     }
 
@@ -168,26 +210,18 @@ public class FindEstatesForClient extends Scene {
             public void handle(ActionEvent event) {
                 table.setEditable(true);
                 String pesel = new String();
-                try {
-                    data = getEstateTable(con, "95031110214");
-                    table.setItems(data);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                for (Client client : clientList){
+                    if(comboBox.getValue().toString().equals(client.getFirstName()+" "+client.getLastName())){
+                        pesel = client.getPesel();
+                        try{
+                            data=getEstateTable(con,pesel);
+                            table.setItems(data);
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 table.setEditable(false);
-//                for(Client client : clientList){
-//                    System.out.print(client.getFirstName() + " " +client.getLastName());
-//                    System.out.print(comboBox.getValue().toString());
-//                    if(comboBox.getValue().toString().equals(client.getFirstName().toString()+" "+client.getLastName().toString())){
-//                        pesel = client.getPesel().toString();
-//                        try {
-//                            data=getEstateTable(con,pesel);
-//                            table.setItems(data);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
             }
         });
         actionVbox.setPadding(new Insets(10, 10, 0, 0));
@@ -236,7 +270,6 @@ public class FindEstatesForClient extends Scene {
                                         alert.setTitle("New interested Client");
                                         alert.setHeaderText("Added interested Client");
                                         alert.showAndWait();
-                                        //TODO: powinno też znikać
 
                                     });
                                     setGraphic(btn);
