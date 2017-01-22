@@ -17,6 +17,8 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import sample.components.CustomLongLabel;
 import sample.entities.*;
+import java.sql.Date;
+import java.time.ZoneId;
 
 import javax.xml.transform.Result;
 import java.io.Console;
@@ -44,6 +46,10 @@ public class FindEstatesForClient extends Scene {
 
     protected List<Client> clientList = new ArrayList<Client>();
     protected ObservableList<String> options = FXCollections.observableArrayList();
+
+    protected ComboBox comboBox;
+
+    private DatePicker dpCurrentDate;//fx:id="DPCurrentDate"
 
     final HBox hb = new HBox();
 
@@ -199,7 +205,7 @@ public class FindEstatesForClient extends Scene {
     public void setupDev(VBox actionVbox) {
         HBox hboxDev = new HBox();
         CustomLongLabel lab = new CustomLongLabel("Select a Client: ");
-        final ComboBox comboBox = new ComboBox(options);
+        comboBox = new ComboBox(options);
         comboBox.setValue(options.get(0));
         comboBox.setVisibleRowCount(5);
         hboxDev.getChildren().addAll(lab, comboBox);
@@ -264,8 +270,40 @@ public class FindEstatesForClient extends Scene {
                                 } else {
                                     btn.setOnAction((ActionEvent event) ->
                                     {
+
+                                        String pesel = new String();
+                                        String id_preferencji = new String();
+                                        for (Client client : clientList) {
+                                            if (comboBox.getValue().toString().equals(client.getFirstName() + " " + client.getLastName())) {
+                                                pesel = client.getPesel();
+                                            }
+                                        }
                                         EstateToChoose estateToChoose = getTableView().getItems().get(getIndex());
-                                        System.out.println(estateToChoose.getId());
+                                        String id = estateToChoose.getId();
+
+                                        try {
+
+                                            PreparedStatement st1 = con.prepareStatement("SELECT id_preferencji FROM klient INNER JOIN PREFERENCJA on PREFERENCJA.ID_KLIENTA = klient.PESEL WHERE klient.PESEL = ?");
+                                            st1.setString(1,pesel);
+                                            ResultSet rs1 = st1.executeQuery();
+                                            while(rs1.next()){
+                                                id_preferencji = rs1.getString("id_preferencji");
+                                            }
+
+
+
+                                            PreparedStatement st2 = con.prepareStatement("INSERT INTO \"PZGODAF\".\"ZAINTERESOWANIE\" (ID_PREFERENCJI, ID_NIERUCHOMOSCI, DATA_ODWIEDZENIA) VALUES (?, ?, '01-JAN-26')");
+                                            st2.setString(1,id_preferencji);
+                                            st2.setString(2,id);
+
+//                                            java.util.Date date = java.util.Date.from(dpCurrentDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+//                                            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+                                            //st2.setString(3, "26-JAN-17");
+                                            ResultSet rs2 = st2.executeQuery();
+
+                                        } catch (SQLException e) {
+                                            e.printStackTrace();
+                                        }
                                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                         alert.setTitle("New interested Client");
                                         alert.setHeaderText("Added interested Client");
